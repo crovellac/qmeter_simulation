@@ -13,11 +13,20 @@ def getGraphFromFunc(f, inputs):
     graph = TGraph(len(inputs),inp,outputs)
     return graph
 
+def getGraphFromArrays(n,x,y):
+    inputs = arr.array('f')
+    outputs = arr.array('f')
+    for i in range(len(x)):
+        inputs.append(x[i])
+        outputs.append(y[i])
+    graph = TGraph(len(inputs),inputs,outputs)
+    return graph
+        
+
 #---------------------preamble----------------
 
 pi = np.pi
 im_unit = complex(0,1)
-print(im_unit)
 
 #----------------------main------------------
 
@@ -157,9 +166,12 @@ def chi(w):
 
 
 
-ic = interpolate.interp1d(k,Icoil)
+ic = interpolate.interp1d(k,Icoil,"cubic")
 #tg = getGraphFromFunc(x1,x)
-tg = getGraphFromFunc(ic,k)
+#tg = getGraphFromFunc(ic,k)
 
-tg.Draw()
+tg2 = getGraphFromArrays(len(k),k,Icoil)
+tg3 = getGraphFromFunc(ic,k) #not going to work, need a linear fit
+
+tg3.Draw()
 gApplication.Run()
