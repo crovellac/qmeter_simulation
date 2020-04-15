@@ -35,17 +35,23 @@ eta = 0.00001*2.6*400
 
 #----------------------main------------------
 
+#Proton resonant frequency at 214 MHz, with 7 l/2 cable
+
 gROOT.Reset()
 
 #Parameters of problem
 U = 0.1 #100 mV RF input
+
+#Coil
 L0 = 3e-8 #Inductance of coil 30 nH
-R = 619
+Rcoil = 0.35  #Resistance of coil 0.35 ohm
+
+R = 619 #Constant current resistance
 R1 = 50 #Amp impedance 50 ohm
-r = 10
-Rcoil = 0.35
-f = 213e6
-knob = 0.885
+r = 10 #Damping resistor
+ 
+f = 213e6 #213 MHz scan
+knob = 0.885 #knob of tuning capacitor
 if (len(args) > 1):
     knob = float(args[1])
 Cstray = 1e-15 #Stray capacitance 10^-3 pF
@@ -132,7 +138,7 @@ def l(w):
 #Variables for creating splines
 k_ints = range(0,256)
 k = np.array(k_ints,float)
-x = (k*delta_w)+w_low
+x = (k*delta_w)+(w_low)
 Icoil_TE = 0.11133
 
 butxi = []
@@ -142,12 +148,12 @@ vreal = []
 
 Icoil = []
 
-f = open("data/DPROTON.DAT","r")
+f = open("data/DPROTON.DAT","r") #DPROTON.DAT
 for line in f:
     butxi.append(float(line))
 f.close()
 
-f2 = open("data/PROTON.DAT","r")
+f2 = open("data/PROTON.DAT","r") #PROTON.DAT
 for line in f2:
     butxii.append(float(line))
 f2.close()
@@ -167,10 +173,10 @@ for line in f5:
     Icoil.append(float(line))
 f5.close()
 
-x1 = interpolate.interp1d(x,butxi)
-x2 = interpolate.interp1d(x,butxii)
-b = interpolate.interp1d(x,vback)
-rb = interpolate.interp1d(x,vreal)
+x1 = interpolate.interp1d(x,butxi,fill_value="extrapolate")
+x2 = interpolate.interp1d(x,butxii,fill_value="extrapolate")
+b = interpolate.interp1d(x,vback,fill_value="extrapolate")
+rb = interpolate.interp1d(x,vreal,fill_value="extrapolate")
 
 def chi(w):
     return complex(x1(w),-1*x2(w))
@@ -180,7 +186,7 @@ def chi(w):
 #print("w_high: " + str(w_high))
 #print("x[1]: " + str(x[1]))
 
-ic = interpolate.interp1d(x,Icoil)
+ic = interpolate.interp1d(x,Icoil,fill_value="extrapolate")
 
 def pt(w):
     return ic(w)/Icoil_TE
@@ -233,6 +239,11 @@ a= (gamma_2 *(alpha_1/gamma_1) - alpha_2)/temp
 bb = (alpha_2 - a*beta_2)/gamma_2
 c = yp1 - a*xp1*xp1 - bb*xp1
 
+print("a = "+str(a))
+print("b = "+str(b))
+print("c = "+str(c))
+
+
 def parfaze(w):
     return a*w*w + bb*w + c
 
@@ -246,7 +257,17 @@ def V_out(w):
     return I*Ztotal(w)*np.exp(im_unit*phi(w)*pi/180)
 
 
+#array_size = 1000
+#wk_ints = range(0,array_size)
+#wk = np.array(wk_ints, float)
+#w = ((wk*delta_w)+(w_low-((array_size/2)*delta_w)))
+
+#print("w_low = "+str(w_low))
+#print("w_high = "+str(w_high))
+#print("delta_w = "+str(delta_w))
+
 tg3 = getGraphFromFunc(V_out,x)
+tg3.SetTitle("Output signal;#omega;Voltage (V)")
 tg3.Draw() 
 
 gApplication.Run()
