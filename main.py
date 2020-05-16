@@ -178,6 +178,7 @@ x2 = interpolate.interp1d(x,butxii,fill_value="extrapolate")
 b = interpolate.interp1d(x,vback,fill_value="extrapolate")
 rb = interpolate.interp1d(x,vreal,fill_value="extrapolate")
 
+#Chi is the magnetic susceptibility. x1 is the dispersive term, and x2 is the absorptive term
 def chi(w):
     return complex(x1(w),-1*x2(w))
 
